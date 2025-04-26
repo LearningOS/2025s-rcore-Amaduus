@@ -51,9 +51,11 @@ lazy_static! {
     /// Global variable: TASK_MANAGER
     pub static ref TASK_MANAGER: TaskManager = {
         let num_app = get_num_app();
+        let call_times = [0; 500];
         let mut tasks = [TaskControlBlock {
             task_cx: TaskContext::zero_init(),
             task_status: TaskStatus::UnInit,
+            call_times,
         }; MAX_APP_NUM];
         for (i, task) in tasks.iter_mut().enumerate() {
             task.task_cx = TaskContext::goto_restore(init_app_cx(i));
@@ -135,6 +137,18 @@ impl TaskManager {
             panic!("All applications completed!");
         }
     }
+    /// syscall time 次数加一
+    fn calltime_add(&self, id: usize) {
+        let current_task = self.inner.exclusive_access().current_task;
+        let inner = &mut self.inner.exclusive_access();
+        inner.tasks[current_task].calltime_add(id);
+    }
+    /// syscall time 次数加一
+    fn calltime(&self, id: usize) -> isize {
+        let current_task = self.inner.exclusive_access().current_task;
+        let inner = &self.inner.exclusive_access();
+        inner.tasks[current_task].calltime(id)
+    }
 }
 
 /// Run the first task in task list.
@@ -168,4 +182,12 @@ pub fn suspend_current_and_run_next() {
 pub fn exit_current_and_run_next() {
     mark_current_exited();
     run_next_task();
+}
+/// syscall time 次数加一
+pub fn calltime_add(id: usize) {
+    TASK_MANAGER.calltime_add(id);
+}
+/// syscall time 次数加一
+pub fn calltime(id: usize) -> isize {
+    TASK_MANAGER.calltime(id)
 }
