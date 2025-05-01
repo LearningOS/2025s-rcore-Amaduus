@@ -131,6 +131,7 @@ impl PhysAddr {
         PhysPageNum(self.0 / PAGE_SIZE)
     }
     /// Get the (ceil) physical page number
+    /// -1 是为了确保当 self.0 恰好是 PAGE_SIZE 的倍数时，不会多加一
     pub fn ceil(&self) -> PhysPageNum {
         PhysPageNum((self.0 - 1 + PAGE_SIZE) / PAGE_SIZE)
     }

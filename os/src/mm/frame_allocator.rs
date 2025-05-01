@@ -15,7 +15,7 @@ pub struct FrameTracker {
 }
 
 impl FrameTracker {
-    /// Create a new FrameTracker
+    /// Create a new FrameTracker and formatting it
     pub fn new(ppn: PhysPageNum) -> Self {
         // page cleaning
         let bytes_array = ppn.get_bytes_array();
